@@ -11,9 +11,7 @@ from runpod.serverless.utils.rp_upload import upload_file_to_bucket
 from runpod.serverless.utils import rp_download, rp_cleanup
 from io import BytesIO
 from rp_schema import INPUT_SCHEMA
-from flux_inf_quant import inference_sample
-from src.flux_lora_training import main
-from src.utils.helper import download_image_from_s3
+from utils.helper import download_image_from_s3
 from utils.logger import logger
 
 
@@ -69,8 +67,12 @@ def save_file(directory, s3_prefix):
 
 def download_images(s3_url, local_dir):
     """download images from the cloud folder"""
-    s3 = boto3.client('s3', aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=SECRET_ACCESS_KEY)
-    dir1, _ = download_image_from_s3(s3, s3_url, local_dir)
+    s3_resource = boto3.resource(
+        's3',
+        aws_access_key_id=ACCESS_KEY_ID,
+        aws_secret_access_key=SECRET_ACCESS_KEY
+    )
+    dir1, _ = download_image_from_s3(s3_resource, s3_url, local_dir)
 
     return dir1
 
@@ -86,18 +88,19 @@ def run(job):
         # Input validation
         validated_input = validate(job_input, INPUT_SCHEMA)
 
-        local_dir = os.getcwd() + f"/{validated_input['id']}" + f"/{validated_input['training_id']}/"
-        instance_dir, class_dir = download_images(validated_input['s3_url'], local_dir)
+
         if 'errors' in validated_input:
             return {"error": validated_input['errors']}
         validated_input = validated_input['validated_input']
+        local_dir = os.getcwd() + f"/{validated_input['id']}" + f"/{validated_input['training_id']}/"
+        instance_dir  = download_images(validated_input['s3_url'], local_dir)
         job_output = []
         returncode = subprocess.call([sys.executable,
                                       'flux_lora_training.py',
-                                      '--pretrained_model_name_or_path=stabilityai/stable-diffusion-xl-base-1.0',
+                                      '--pretrained_model_name_or_path=/workspace/flux-dev-1',
                                       f'--instance_data_dir={instance_dir}',
                                       f'--output_dir=./logs/{validated_input["id"]}/{validated_input["training_id"]}',
-                                      '--mixed_precision="bf16"',
+                                      '--mixed_precision=bf16',
                                       f'--instance_prompt={validated_input["instance_prompt"]}',
                                       f'--resolution=512',
                                       '--train_batch_size=1',
@@ -107,17 +110,19 @@ def run(job):
                                       '--lr_scheduler="constant"',
                                       '--lr_warmup_steps=0',
                                       '--max_train_steps=500',
-                                      f'--training_id={validated_input["training_id"]}',
                                       f'--seed={"0"}'],
                                      cwd=cwd_training,
                                      stdout=subprocess.PIPE)
-        save_file('./logs/{validated_input["id"]}/{validated_input["training_id"]', 'trainings')
+        save_file(f'./logs/{validated_input["id"]}/{validated_input["training_id"]}', 'trainings')
         job_output.append({"Training_success": True,
                            "Training_id": validated_input["training_id"]})
         # Remove downloaded input objects
         rp_cleanup.clean(['input_objects'])
         return job_output
     except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        logger.error(exc_type, fname, exc_tb.tb_lineno)
         logger.error(f"error occured due to {e}")
 
 
