@@ -11,6 +11,7 @@ from runpod.serverless.utils.rp_upload import upload_file_to_bucket
 from runpod.serverless.utils import rp_download, rp_cleanup
 from io import BytesIO
 from rp_schema import INPUT_SCHEMA
+from src.utils.caption import summerised_caption
 from utils.helper import download_image_from_s3
 from utils.logger import logger
 
@@ -93,7 +94,8 @@ def run(job):
             return {"error": validated_input['errors']}
         validated_input = validated_input['validated_input']
         local_dir = os.getcwd() + f"/{validated_input['id']}" + f"/{validated_input['training_id']}/"
-        instance_dir  = download_images(validated_input['s3_url'], local_dir)
+        instance_dir = download_images(validated_input['s3_url'], local_dir)
+        instance_prompt = summerised_caption(instance_dir, validated_input["modifier_token"])
         job_output = []
         returncode = subprocess.call([sys.executable,
                                       'flux_lora_training.py',
@@ -101,7 +103,7 @@ def run(job):
                                       f'--instance_data_dir={instance_dir}',
                                       f'--output_dir=./logs/{validated_input["id"]}/{validated_input["training_id"]}',
                                       '--mixed_precision=bf16',
-                                      f'--instance_prompt={validated_input["instance_prompt"]}',
+                                      f'--instance_prompt={instance_prompt}',
                                       f'--resolution=512',
                                       '--train_batch_size=1',
                                       '--gradient_accumulation_steps=4',

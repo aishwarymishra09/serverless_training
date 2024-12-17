@@ -15,6 +15,7 @@
 
 import argparse
 import copy
+import gc
 import itertools
 import logging
 import math
@@ -76,6 +77,11 @@ check_min_version("0.31.0.dev0")
 
 logger = get_logger(__name__)
 
+def flush():
+    gc.collect()
+    torch.cuda.empty_cache()
+    torch.cuda.reset_max_memory_allocated()
+    torch.cuda.reset_peak_memory_stats()
 
 def save_model_card(
     repo_id: str,
@@ -1889,4 +1895,5 @@ def main(args):
 
 if __name__ == "__main__":
     args = parse_args()
+    flush()
     main(args)

@@ -1,5 +1,5 @@
 INPUT_SCHEMA = {
-    'instance_prompt': {
+    'modifier_token': {
         'type': str,
         'required': True
     },
