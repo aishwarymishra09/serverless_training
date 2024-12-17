@@ -1,5 +1,5 @@
 { "input" :{
-  "instance_prompt": "a handsome man in city backgraound with a dark blue  pqw1 headphones. The front of the pqw1 headphones has the JBL logo in white, with the letters 'JBL' in the center. The back of the pqw1 headphone has a circular button with a small circular design on it",
+  "modifier_token": "pt1",
   "s3_url": "s3://rekogniz-training-data/test-space/headphones2/",
   "id":"2423",
   "training_id": "34534565"}

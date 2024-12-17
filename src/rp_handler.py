@@ -11,7 +11,7 @@ from runpod.serverless.utils.rp_upload import upload_file_to_bucket
 from runpod.serverless.utils import rp_download, rp_cleanup
 from io import BytesIO
 from rp_schema import INPUT_SCHEMA
-from src.utils.caption import summerised_caption
+from utils.caption import summerised_caption
 from utils.helper import download_image_from_s3
 from utils.logger import logger
 
