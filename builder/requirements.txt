@@ -10,4 +10,5 @@ tensorboard
 PEFT
 sentencepiece
 boto3
-
+timm
+einops

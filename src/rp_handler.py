@@ -95,7 +95,7 @@ def run(job):
         validated_input = validated_input['validated_input']
         local_dir = os.getcwd() + f"/{validated_input['id']}" + f"/{validated_input['training_id']}/"
         instance_dir = download_images(validated_input['s3_url'], local_dir)
-        instance_prompt = summerised_caption(instance_dir, validated_input["modifier_token"])
+        instance_prompt = summerised_caption( directory=instance_dir,modifier_token= validated_input["modifier_token"])
         job_output = []
         returncode = subprocess.call([sys.executable,
                                       'flux_lora_training.py',
@@ -109,7 +109,7 @@ def run(job):
                                       '--gradient_accumulation_steps=4',
                                       '--optimizer="prodigy"',
                                       '--learning_rate=1e-4',
-                                      '--lr_scheduler="constant"',
+                                      '--lr_scheduler=constant',
                                       '--lr_warmup_steps=0',
                                       '--max_train_steps=500',
                                       f'--seed={"0"}'],

@@ -12,7 +12,7 @@ from huggingface_hub import login
 
 login("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")
 
-model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
+model_id = "/workspace/Meta-Llama-3-8B-Instruct"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
