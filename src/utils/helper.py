@@ -1,7 +1,7 @@
 import os
 from urllib.parse import urlparse
 from botocore.exceptions import ClientError
-from src.utils.logger import logger
+from utils.logger import logger
 
 
 def download_image_from_s3(s3, s3_url, local_dir):

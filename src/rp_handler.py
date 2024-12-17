@@ -113,7 +113,7 @@ def run(job):
                                       f'--seed={"0"}'],
                                      cwd=cwd_training,
                                      stdout=subprocess.PIPE)
-        save_file(f'./logs/{validated_input["id"]}/{validated_input["training_id"]}', 'trainings')
+        save_file(f'./logs/{validated_input["id"]}/{validated_input["training_id"]}', f'trainings/{validated_input["id"]}/{validated_input["training_id"]}')
         job_output.append({"Training_success": True,
                            "Training_id": validated_input["training_id"]})
         # Remove downloaded input objects
